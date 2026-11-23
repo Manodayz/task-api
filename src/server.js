@@ -4,6 +4,10 @@ import cors from 'cors';
 import swaggerUi from 'swagger-ui-express';
 import yaml from 'js-yaml';
 import fs from 'fs';
+import authRoutes from './routes/authRoutes.js';
+import { getJwtSecret } from './config/jwt.js';
+
+getJwtSecret();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -23,6 +27,8 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok' });
 });
+
+app.use('/api/auth', authRoutes);
 
 app.use((req, res, next) => {
   res.status(404).json({ errors: ['Not found'] });
