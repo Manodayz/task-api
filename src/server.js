@@ -4,7 +4,6 @@ import cors from 'cors';
 import swaggerUi from 'swagger-ui-express';
 import yaml from 'js-yaml';
 import fs from 'fs';
-import taskRoutes from './routes/taskRoutes.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -25,18 +24,17 @@ app.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok' });
 });
 
-app.use('/tasks', taskRoutes);
-
 app.use((req, res, next) => {
-  res.status(404).json({ error: 'Not found' });
+  res.status(404).json({ errors: ['Not found'] });
 });
 
 app.use((err, req, res, next) => {
-  console.error(err);
-  const status = err.status || 500;
-  res.status(status).json({
-    error: err.message || 'Internal Server Error',
-  });
+  const status = err.status || err.statusCode || 500;
+  if (status >= 500) {
+    console.error(err);
+    return res.status(status).json({ errors: ['Internal Server Error'] });
+  }
+  res.status(status).json({ errors: [err.message || 'Bad request'] });
 });
 
 app.listen(PORT, () => {
